@@ -265,7 +265,7 @@ export const useSlashCommandProcessor = (
       const commandService = await CommandService.create(
         [
           new McpPromptLoader(config),
-          new BuiltinCommandLoader(config),
+          new BuiltinCommandLoader(config, settings),
           new FileCommandLoader(config),
         ],
         controller.signal,
@@ -276,7 +276,7 @@ export const useSlashCommandProcessor = (
     return () => {
       controller.abort();
     };
-  }, [config, reloadTrigger, isConfigInitialized]);
+  }, [config, reloadTrigger, isConfigInitialized, settings]);
 
   const handleSlashCommand = useCallback(
     async (
