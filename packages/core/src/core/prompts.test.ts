@@ -46,6 +46,10 @@ describe('Core System Prompt (prompts.ts)', () => {
     mockConfig = {
       getToolRegistry: vi.fn().mockReturnValue({
         getAllToolNames: vi.fn().mockReturnValue([]),
+        getAllTools: vi.fn().mockReturnValue([
+          { name: 'test-tool', description: 'A test tool.' },
+          { name: 'another-tool', description: 'Another test tool.' },
+        ]),
       }),
       getEnableShellOutputEfficiency: vi.fn().mockReturnValue(true),
       storage: {
@@ -136,6 +140,10 @@ describe('Core System Prompt (prompts.ts)', () => {
           getAllToolNames: vi
             .fn()
             .mockReturnValue([CodebaseInvestigatorAgent.name]),
+          getAllTools: vi.fn().mockReturnValue([
+            { name: 'test-tool', description: 'A test tool.' },
+            { name: 'another-tool', description: 'Another test tool.' },
+          ]),
         }),
         getEnableShellOutputEfficiency: vi.fn().mockReturnValue(true),
         storage: {
@@ -168,7 +176,7 @@ describe('Core System Prompt (prompts.ts)', () => {
         `your **first and primary tool** must be '${CodebaseInvestigatorAgent.name}'`,
       );
       expect(prompt).toContain(
-        "Use 'search_file_content' and 'glob' search tools extensively",
+        "Use 'search_file_content', 'glob' and 'list_directory' search tools extensively",
       );
     });
   });
