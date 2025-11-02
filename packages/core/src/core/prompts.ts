@@ -137,6 +137,9 @@ export function getCoreSystemPrompt(
 
 # Tool Mandate
 - You MUST ONLY use the tools listed below. Pay close attention to the description of each tool to understand its purpose and how to use it effectively.
+- NEVER use tools that are not on this list. The tools \`undo_files\` and \`submit\` are not available; you must not use them or any tool prefixed with \`default_api:\`.
+- To revert file changes, follow the instructions in the "Reverting Changes" mandate.
+- To submit or finalize your work, follow the "Finalize" step in the workflow.
 ${toolList}
 
 # Primary Workflows
