@@ -94,6 +94,16 @@ export interface RipGrepToolParams {
    * File pattern to include in the search (e.g. "*.js", "*.{ts,tsx}")
    */
   include?: string;
+
+  /**
+   * If true, searches case-sensitively. Defaults to false.
+   */
+  case_sensitive?: boolean;
+
+  /**
+   * If true, treats pattern as a literal string. Defaults to false.
+   */
+  fixed_strings?: boolean;
 }
 
 /**
@@ -163,16 +173,20 @@ class GrepToolInvocation extends BaseToolInvocation<
   async execute(signal: AbortSignal): Promise<ToolResult> {
     try {
       const workspaceContext = this.config.getWorkspaceContext();
-      const searchDirAbs = this.resolveAndValidatePath(this.params.path);
-      const searchDirDisplay = this.params.path || '.';
+
+      // Default to '.' if path is explicitly undefined/null.
+      // This forces CWD search instead of 'all workspaces' search by default.
+      const pathParam = this.params.path || '.';
+
+      const searchDirAbs = this.resolveAndValidatePath(pathParam);
+      const searchDirDisplay = pathParam;
 
       // Determine which directories to search
       let searchDirectories: readonly string[];
       if (searchDirAbs === null) {
-        // No path specified - search all workspace directories
+        // Fallback only if something went wrong with '.' resolution
         searchDirectories = workspaceContext.getDirectories();
       } else {
-        // Specific path provided - search only that directory
         searchDirectories = [searchDirAbs];
       }
 
@@ -188,6 +202,8 @@ class GrepToolInvocation extends BaseToolInvocation<
           pattern: this.params.pattern,
           path: searchDir,
           include: this.params.include,
+          case_sensitive: this.params.case_sensitive,
+          fixed_strings: this.params.fixed_strings,
           signal,
         });
 
@@ -318,18 +334,29 @@ class GrepToolInvocation extends BaseToolInvocation<
     pattern: string;
     path: string;
     include?: string;
+    case_sensitive?: boolean;
+    fixed_strings?: boolean;
     signal: AbortSignal;
   }): Promise<GrepMatch[]> {
-    const { pattern, path: absolutePath, include } = options;
-
-    const rgArgs = [
-      '--line-number',
-      '--no-heading',
-      '--with-filename',
-      '--ignore-case',
-      '--regexp',
+    const {
       pattern,
-    ];
+      path: absolutePath,
+      include,
+      case_sensitive,
+      fixed_strings,
+    } = options;
+
+    const rgArgs = ['--line-number', '--no-heading', '--with-filename'];
+
+    if (!case_sensitive) {
+      rgArgs.push('--ignore-case');
+    }
+
+    if (fixed_strings) {
+      rgArgs.push('--fixed-strings');
+    }
+
+    rgArgs.push('--regexp', pattern);
 
     if (include) {
       rgArgs.push('--glob', include);
@@ -461,24 +488,34 @@ export class RipGrepTool extends BaseDeclarativeTool<
     super(
       RipGrepTool.Name,
       'SearchText',
-      'Searches for a regular expression pattern within the content of files in a specified directory (or current working directory). Can filter files by a glob pattern. Returns the lines containing matches, along with their file paths and line numbers. Total results limited to 20,000 matches like VSCode.',
+      'FAST, optimized search powered by `ripgrep`. PREFERRED over standard `run_shell_command("grep ...")` due to better performance and automatic output limiting (max 20k matches).',
       Kind.Search,
       {
         properties: {
           pattern: {
             description:
-              "The regular expression (regex) pattern to search for within file contents (e.g., 'function\\s+myFunction', 'import\\s+\\{.*\\}\\s+from\\s+.*').",
+              "The pattern to search for. By default, treated as a Rust-flavored regular expression. Use '\\b' for precise symbol matching (e.g., '\\bMatchMe\\b').",
             type: 'string',
           },
           path: {
             description:
-              'Optional: The absolute path to the directory to search within. If omitted, searches the current working directory.',
+              "Directory to search. Relative paths are resolved against the current working directory. Defaults to current working directory ('.') if omitted.",
             type: 'string',
           },
           include: {
             description:
-              "Optional: A glob pattern to filter which files are searched (e.g., '*.js', '*.{ts,tsx}', 'src/**'). If omitted, searches all files (respecting potential global ignores).",
+              "Glob pattern to filter files (e.g., '*.ts', 'src/**'). Recommended for large repositories to reduce noise.",
             type: 'string',
+          },
+          case_sensitive: {
+            description:
+              'If true, search is case-sensitive. Defaults to false (ignore case) if omitted.',
+            type: 'boolean',
+          },
+          fixed_strings: {
+            description:
+              'If true, treats the `pattern` as a literal string instead of a regular expression. Useful for searching for exact strings with special characters (like URLs) without escaping.',
+            type: 'boolean',
           },
         },
         required: ['pattern'],
