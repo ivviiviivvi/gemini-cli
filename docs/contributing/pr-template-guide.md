@@ -235,10 +235,9 @@ foundational refactoring.
 
 ### Balanced Approach
 
-The best PRs use all three elements in harmony. Technical rigor (logos)
-
-- clear impact (pathos) + demonstrated quality (ethos) = compelling, trustworthy
-  contribution.
+The best PRs use all three elements in harmony. Technical rigor (logos) + clear
+impact (pathos) + demonstrated quality (ethos) = compelling, trustworthy
+contribution.
 
 ## Examples from Other Projects
 
