@@ -297,3 +297,10 @@ benefits everyone.
 
 Remember: A great PR description is a gift to your reviewers, your future self,
 and everyone who will maintain this code.
+
+## Complete Example
+
+For a complete, real-world example of a well-crafted PR using this template, see
+[PR Example: JSON Streaming Output](/docs/contributing/pr-example.md). This
+example demonstrates how to fill out each section effectively with concrete
+details, evidence, and clear reasoning.
