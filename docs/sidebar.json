@@ -216,6 +216,10 @@
       {
         "label": "Issue and PR Automation",
         "slug": "docs/issue-and-pr-automation"
+      },
+      {
+        "label": "PR Template Guide",
+        "slug": "docs/contributing/pr-template-guide"
       }
     ]
   },
