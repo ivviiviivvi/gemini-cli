@@ -144,6 +144,12 @@ standard for your commit messages.
 In the PR description, explain the "why" behind your changes and link to the
 relevant issue (e.g., `Fixes #123`).
 
+Our PR template incorporates rhetorical elements (logos, pathos, ethos) to help
+you articulate the logic, value, and quality of your contribution. See the
+[PR Template Guide](/docs/contributing/pr-template-guide.md) for detailed
+guidance on crafting compelling pull requests that help reviewers understand
+your work's specialty, purpose, and impact.
+
 ### Forking
 
 If you are forking the repository you will be able to run the Build, Test and
